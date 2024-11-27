@@ -9,7 +9,7 @@ The console will print some relevant information during the execution of the pro
 
 To test the code, the following commands should be executed in the terminal:
 - erl
-- c(factory)
-- factory:factory()
+- c(factory).
+- factory:factory().
 
 Deadlocks and data races are avoided through the use of asynchronous communication with messages. Process starvation is avoided, since the packages are divided equally by the conveyor belts/trucks, so the corresponding processes get equal amount of work.
