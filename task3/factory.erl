@@ -1,7 +1,7 @@
 -module(factory).
 -export([
     factory/0,
-    conveyor_belt/2,
+    conveyor_belt/1,
     truck/6,
     spawn_actors/4,
     send_packages/4,
@@ -30,10 +30,8 @@ spawn_actors(N_belts, Truck_cap, Convs, Truck_timeout) ->
     %% State = {Truck_id, capacity, load, iteration, total_packages}
     Truck_process_id = spawn(?MODULE, truck, [Truck_id, Truck_cap, 0, 1, 0, Truck_timeout]),
 
-    Conv_id = "conv_" ++ integer_to_list(N_belts),
-
     %% State = {conv_id, truck_process_id}
-    Conv_process_id = spawn(?MODULE, conveyor_belt, [Conv_id, Truck_process_id]),
+    Conv_process_id = spawn(?MODULE, conveyor_belt, [Truck_process_id]),
 
     New_convs = Convs ++ [Conv_process_id],
 
@@ -59,31 +57,31 @@ stop_convs([H | T]) ->
     H ! stop,
     stop_convs(T).
 
-conveyor_belt(Id, Truck) ->
+conveyor_belt(Truck) ->
     receive
         {Size} ->
-            Truck ! {Id, Size},
+            Truck ! {Size},
             %%io:format("~p sent a package of size ~p to its truck~n", [Id, Size]),
-            conveyor_belt(Id, Truck);
+            conveyor_belt(Truck);
         stop ->
             Truck ! stop
     end.
 
 truck(Truck_id, Capacity, Load, Iteration, Total_packages, Truck_timeout) ->
     receive
-        {Id, Size} when Size + Load =< Capacity ->
+        {Size} when Size + Load =< Capacity ->
             %% Load package into truck
             Curr_truck_id = Truck_id ++ integer_to_list(Iteration),
             io:format("~p (~p/~p).~n", [Curr_truck_id, Load + 1, Capacity]),
             truck(Truck_id, Capacity, Load + Size, Iteration, Total_packages + 1, Truck_timeout);
-        {Id, Size} when Size + Load > Capacity ->
+        {Size} when Size + Load > Capacity ->
             %% Substitute truck
             Curr_truck_id = Truck_id ++ integer_to_list(Iteration),
             New_truck_id = Truck_id ++ integer_to_list(Iteration + 1),
 
             %%Timeout
             timer:sleep(Truck_timeout),
-            io:format("~p is done waiting for the substituiton timeout. ~n", [Curr_truck_id]), 
+            io:format("~p is done waiting for the substituiton timeout. ~n", [Curr_truck_id]),
 
             %% Log truck substitution
             io:format("~p is full, substituting with new iteration ~p~n", [

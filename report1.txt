@@ -2,7 +2,7 @@ The model for our system is implemented through an actor model, where each actor
 
 The factory calls a function (spawn_actors/4) that spawns all the processes representing the conveyer belts and the respective trucks. It then calls a function (send_packages/3) that sends messages with the package to each of the conveyors alternately until there none left to send in which case it calls a function (stop_convs/1) that sends all the conveyors a message signaling the end of packages. 
 
-Conveyor belts (conveyor_belt/2) receive messages from the factory and act accordingly to its content. If it's a 'stop' message, it will send a message to the corresponding truck signaling the end of packages and terminates, otherwise, it sends a message with the package.
+Conveyor belts (conveyor_belt/1) receive messages from the factory and act accordingly to its content. If it's a 'stop' message, it will send a message to the corresponding truck signaling the end of packages and terminates, otherwise, it sends a message with the package.
 
 Trucks (truck/5) receive messages from their correspondent conveyor belt and act accordingly. If it's a 'stop' message, it terminates, otherwise, it looks at the content of the package received. If the truck is too full to take it, it gets replaced and then the new truck gets loaded with it.
 
