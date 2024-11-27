@@ -40,9 +40,11 @@ spawn_actors(N_belts, Truck_cap, Convs) ->
 %%All packages sent
 send_packages(0, Convs, _, _) ->
     stop_convs(Convs);
+
 %%Reset conveyor belt iteration
 send_packages(N_packages, Convs, [], Package_max_size) ->
     send_packages(N_packages, Convs, Convs, Package_max_size);
+
 %%Send a package to the next conveyor
 send_packages(N_packages, Convs, [H | T], Package_max_size) ->
     Size = rand:uniform(Package_max_size),
@@ -51,6 +53,7 @@ send_packages(N_packages, Convs, [H | T], Package_max_size) ->
 
 stop_convs([]) ->
     true;
+
 %%Stop all convs
 stop_convs([H | T]) ->
     H ! stop,
@@ -79,10 +82,8 @@ truck(Truck_id, Capacity, Load, Iteration, Total_packages) ->
             New_truck_id = Truck_id ++ integer_to_list(Iteration + 1),
 
             %% Log truck substitution
-            io:format("~p is full, substituting with new iteration ~p~n", [
-                Curr_truck_id, New_truck_id
-            ]),
             io:format("~p (~p/~p).~n", [Curr_truck_id, Load, Capacity]),
+            io:format("~p is full, substituting with new iteration ~p~n", [Curr_truck_id, New_truck_id]),
 
             %% Load package into the new truck
             truck(Truck_id, Capacity, Size, Iteration + 1, Total_packages + 1);
