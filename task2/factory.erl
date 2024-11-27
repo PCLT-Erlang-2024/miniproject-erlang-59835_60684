@@ -12,12 +12,12 @@ factory() ->
     N_belts = 10,
     Truck_cap = 50,
     N_packages = 1000,
-    Max_size = 10,
+    Package_max_size = 10,
 
     Convs = spawn_actors(N_belts, Truck_cap, []),
 
     %%Send packages to conveyors
-    send_packages(N_packages, Convs, Convs, Max_size).
+    send_packages(N_packages, Convs, Convs, Package_max_size).
 
 %%After all actors are spawned, return conveyor process ids for messaging
 spawn_actors(0, _, Convs) ->
@@ -43,13 +43,13 @@ spawn_actors(N_belts, Truck_cap, Convs) ->
 send_packages(0, Convs, _, _) ->
     stop_convs(Convs);
 %%Reset conveyor belt iteration
-send_packages(N_packages, Convs, [], Max_size) ->
-    send_packages(N_packages, Convs, Convs, Max_size);
+send_packages(N_packages, Convs, [], Package_max_size) ->
+    send_packages(N_packages, Convs, Convs, Package_max_size);
 %%Send a package to the next conveyor
-send_packages(N_packages, Convs, [H | T], Max_size) ->
-    Size = rand:uniform(Max_size),
+send_packages(N_packages, Convs, [H | T], Package_max_size) ->
+    Size = rand:uniform(Package_max_size),
     H ! {Size},
-    send_packages(N_packages - 1, Convs, T, Max_size).
+    send_packages(N_packages - 1, Convs, T, Package_max_size).
 
 stop_convs([]) ->
     true;
