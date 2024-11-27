@@ -4,19 +4,20 @@
     conveyor_belt/2,
     truck/5,
     spawn_actors/3,
-    send_packages/3,
+    send_packages/4,
     stop_convs/1
 ]).
 
 factory() ->
     N_belts = 10,
     Truck_cap = 50,
-    N_packages = 200,
+    N_packages = 1000,
+    Max_size = 10,
 
     Convs = spawn_actors(N_belts, Truck_cap, []),
 
     %%Send packages to conveyors
-    send_packages(N_packages, Convs, Convs).
+    send_packages(N_packages, Convs, Convs, Max_size).
 
 %%After all actors are spawned, return conveyor process ids for messaging
 spawn_actors(0, _, Convs) ->
@@ -39,16 +40,16 @@ spawn_actors(N_belts, Truck_cap, Convs) ->
     spawn_actors(N_belts - 1, Truck_cap, New_convs).
 
 %%All packages sent
-send_packages(0, Convs, _) ->
+send_packages(0, Convs, _, _) ->
     stop_convs(Convs);
 %%Reset conveyor belt iteration
-send_packages(N_packages, Convs, []) ->
-    send_packages(N_packages, Convs, Convs);
+send_packages(N_packages, Convs, [], Max_size) ->
+    send_packages(N_packages, Convs, Convs, Max_size);
 %%Send a package to the next conveyor
-send_packages(N_packages, Convs, [H | T]) ->
-    Size = rand:uniform(10),
+send_packages(N_packages, Convs, [H | T], Max_size) ->
+    Size = rand:uniform(Max_size),
     H ! {Size},
-    send_packages(N_packages - 1, Convs, T).
+    send_packages(N_packages - 1, Convs, T, Max_size).
 
 stop_convs([]) ->
     true;
@@ -81,7 +82,7 @@ truck(Truck_id, Capacity, Load, Iteration, Total_packages) ->
 
             %%Timeout
             timer:sleep(1000),
-            io:format("~p is done waiting for the substituiton timeout. ~n", [Curr_truck_id]),
+            io:format("~p is done waiting for the substituiton timeout. ~n", [Curr_truck_id]), 
 
             %% Log truck substitution
             io:format("~p is full, substituting with new iteration ~p~n", [
